@@ -128,6 +128,26 @@ class ModelGenerator extends BaseGenerator
             );
         }
 
+        if (!$this->commandData->getOption('cascadeDeletes') || !$this->commandData->getOption('softDelete'))
+        {
+            $templateData = str_replace('$RELATIONS_LIST$', '', $templateData);
+        }
+        else if ($this->commandData->getOption('cascadeDeletes'))
+        {
+            $templateData = str_replace(
+                '$RELATIONS_LIST$',
+                infy_nl_tab().'/**'.
+                infy_nl_tab().' * Related models for cascaded soft-deletion'.
+                infy_nl_tab().' *'.
+                infy_nl_tab().' * @var array'.
+                infy_nl_tab().' */'.
+                infy_nl_tab()."public static \$cascadeDeletes = [".
+                implode(','.infy_nl_tab(1, 2), $this->generateRelationsList()).
+                infy_nl_tab()."];\n",
+                $templateData
+            );
+        }
+
         return $templateData;
     }
 
@@ -452,6 +472,30 @@ class ModelGenerator extends BaseGenerator
             }
         }
 
+        return $relations;
+    }
+
+    private function generateRelationsList()
+    {
+        $relations = [];
+
+        foreach ($this->commandData->relations as $relation) {
+
+            if ($relation->type == 'mt1')
+                continue;
+
+            $field = (isset($relation->inputs[0])) ? $relation->inputs[0] : null;
+            $singularRelation = (!empty($this->relationName)) ? $this->relationName : Str::camel($field);
+            $pluralRelation = (!empty($this->relationName)) ? $this->relationName : Str::camel(Str::plural($field));
+
+
+            if ($relation->type == '1t1' && !empty($singularRelation)) {
+                $relations[] = "'".$singularRelation."'";
+            }
+            else if (!empty($pluralRelation)) {
+                $relations[] = "'".$pluralRelation."'";
+            }
+        }
         return $relations;
     }
 
