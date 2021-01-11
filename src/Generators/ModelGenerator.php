@@ -102,6 +102,12 @@ class ModelGenerator extends BaseGenerator
             $templateData
         );
 
+        $templateData = str_replace(
+            '$RELATIONS_LIST$',
+            implode(','.infy_nl_tab(1, 2), $this->generateRelationsList()),
+            $templateData
+        );
+
         $templateData = str_replace('$GENERATE_DATE$', date('F j, Y, g:i a T'), $templateData);
 
         return $templateData;
@@ -124,26 +130,6 @@ class ModelGenerator extends BaseGenerator
             $templateData = str_replace(
                 '$SOFT_DELETE_DATES$',
                 infy_nl_tab()."protected \$dates = ['".$deletedAtTimestamp."'];\n",
-                $templateData
-            );
-        }
-
-        if (!$this->commandData->getOption('cascadeDeletes') || !$this->commandData->getOption('softDelete'))
-        {
-            $templateData = str_replace('$RELATIONS_LIST$', '', $templateData);
-        }
-        else if ($this->commandData->getOption('cascadeDeletes'))
-        {
-            $templateData = str_replace(
-                '$RELATIONS_LIST$',
-                infy_nl_tab().'/**'.
-                infy_nl_tab().' * Related models for cascaded soft-deletion'.
-                infy_nl_tab().' *'.
-                infy_nl_tab().' * @var array'.
-                infy_nl_tab().' */'.
-                infy_nl_tab()."public static \$cascadeDeletes = [".
-                implode(','.infy_nl_tab(1, 2), $this->generateRelationsList()).
-                infy_nl_tab()."];\n",
                 $templateData
             );
         }

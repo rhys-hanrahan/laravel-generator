@@ -38,7 +38,14 @@ $PRIMARY$
         $RULES$
     ];
 
-$RELATIONS_LIST$
+    /**
+     * Relationships for cascaded deletion.
+     *
+     * @var array
+     */
+    public static $cascadeDeletes = [
+        $RELATIONS_LIST$
+    ];
 
     $RELATIONS$
 }
